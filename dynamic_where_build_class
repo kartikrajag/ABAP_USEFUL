@@ -1,0 +1,90 @@
+DATA: lt_fieldrangetab TYPE  wrffieldrangetab,
+          lt_tables_tab    TYPE  wrfds_tables_tty,
+          lt_where_tab     TYPE  rsds_where_tab,
+          lt_rangetab      TYPE  wrfgenrangetab.
+
+    DATA: lwa_fieldrangetab TYPE  wrffieldrange,
+          lwa_tables_tab    TYPE  wrfds_tables_sty,
+          lwa_where         TYPE  rsdswhere.
+
+    DEFINE macro_build_fieldrangetab.
+
+      CLEAR: lwa_fieldrangetab.
+      lwa_fieldrangetab-fieldname = &1.
+*      lwa_fieldrangetab-selection =  CONV wrfgenrangetab( &2 ).
+       MOVE-CORRESPONDING &2 to lt_rangetab.
+       lwa_fieldrangetab-selection = lt_rangetab.
+      INSERT lwa_fieldrangetab INTO TABLE lt_fieldrangetab.
+
+    END-OF-DEFINITION.
+
+
+
+    CASE pv_tabname.
+
+      WHEN 'EDIDC'.
+        REFRESH:lt_fieldrangetab,lt_tables_tab,lt_rangetab.
+
+        macro_build_fieldrangetab 'EDIDC-DOCNUM' so_docnm[].
+        macro_build_fieldrangetab 'EDIDC-MESTYP' so_mstyp[].
+        macro_build_fieldrangetab 'EDIDC-DIRECT' so_dirct[].
+        macro_build_fieldrangetab 'EDIDC-STATUS' so_stat[].
+        MOVE-CORRESPONDING so_crdat[] to lt_rangetab[].
+        macro_build_fieldrangetab 'EDIDC-CREDAT' lt_rangetab . "so_crdat[].
+        macro_build_fieldrangetab 'EDIDC-CRETIM' so_crtim[].
+
+        CLEAR: lwa_tables_tab.
+        lwa_tables_tab-tabname = 'EDIDC'.
+        INSERT lwa_tables_tab INTO TABLE lt_tables_tab.
+
+        CALL METHOD cl_wrf_dynamic_selection=>build_where_string_tab
+          EXPORTING
+            it_selectopt = lt_fieldrangetab
+            it_from      = lt_tables_tab
+            i_spras      = 'E'
+          IMPORTING
+            et_where     = pt_where_tab.
+
+      WHEN 'EDIDS'.
+        REFRESH:lt_fieldrangetab,lt_tables_tab.
+
+        macro_build_fieldrangetab 'edids-stamno' so_stmno[].
+        macro_build_fieldrangetab 'edids-stamid' so_stmid[].
+        macro_build_fieldrangetab 'edids-stapa1' so_stpa1[].
+        macro_build_fieldrangetab 'edids-stapa2' so_stpa2[].
+        macro_build_fieldrangetab 'edids-stapa3' so_stpa3[].
+        macro_build_fieldrangetab 'edids-stapa4' so_stpa4[].
+
+        CLEAR: lwa_tables_tab.
+        lwa_tables_tab-tabname = 'EDIDS'.
+        INSERT lwa_tables_tab INTO TABLE lt_tables_tab.
+
+        CALL METHOD cl_wrf_dynamic_selection=>build_where_string_tab
+          EXPORTING
+            it_selectopt = lt_fieldrangetab
+            it_from      = lt_tables_tab
+            i_spras      = 'E'
+          IMPORTING
+            et_where     = pt_where_tab.
+
+      WHEN 'EDID4'.
+
+
+      WHEN 'EDP21'.
+        REFRESH: lt_fieldrangetab, lt_tables_tab.
+        macro_build_fieldrangetab 'edp21-mescod' so_mscod[].
+        macro_build_fieldrangetab 'edp21-mesfct' so_msfct[].
+
+        CLEAR:lwa_tables_tab.
+        lwa_tables_tab-tabname = 'EDP21'.
+        INSERT lwa_tables_tab INTO TABLE lt_tables_tab.
+
+        CALL METHOD cl_wrf_dynamic_selection=>build_where_string_tab
+          EXPORTING
+            it_selectopt = lt_fieldrangetab
+            it_from      = lt_tables_tab
+            i_spras      = 'E'
+          IMPORTING
+            et_where     = pt_where_tab.
+
+    ENDCASE.
