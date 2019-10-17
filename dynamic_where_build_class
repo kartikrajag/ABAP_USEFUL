@@ -1,5 +1,5 @@
 DATA: lt_fieldrangetab TYPE  wrffieldrangetab,
-          lt_tables_tab    TYPE  wrfds_tables_tty,
+          lt_tables_tab    TYPE  wrfds_tables_tty,  "WHERE table
           lt_where_tab     TYPE  rsds_where_tab,
           lt_rangetab      TYPE  wrfgenrangetab.
 
@@ -7,11 +7,12 @@ DATA: lt_fieldrangetab TYPE  wrffieldrangetab,
           lwa_tables_tab    TYPE  wrfds_tables_sty,
           lwa_where         TYPE  rsdswhere.
 
+* Begin of MACRO to populate SELECT-OPTIONs and field name to internal table of type wrfds_tables_tty
     DEFINE macro_build_fieldrangetab.
 
       CLEAR: lwa_fieldrangetab.
       lwa_fieldrangetab-fieldname = &1.
-*      lwa_fieldrangetab-selection =  CONV wrfgenrangetab( &2 ).
+*      lwa_fieldrangetab-selection =  CONV wrfgenrangetab( &2 ).  "Example how to convert code
        MOVE-CORRESPONDING &2 to lt_rangetab.
        lwa_fieldrangetab-selection = lt_rangetab.
       INSERT lwa_fieldrangetab INTO TABLE lt_fieldrangetab.
@@ -25,7 +26,7 @@ DATA: lt_fieldrangetab TYPE  wrffieldrangetab,
       WHEN 'EDIDC'.
         REFRESH:lt_fieldrangetab,lt_tables_tab,lt_rangetab.
 
-        macro_build_fieldrangetab 'EDIDC-DOCNUM' so_docnm[].
+        macro_build_fieldrangetab 'EDIDC-DOCNUM' so_docnm[].    "Call MACRO
         macro_build_fieldrangetab 'EDIDC-MESTYP' so_mstyp[].
         macro_build_fieldrangetab 'EDIDC-DIRECT' so_dirct[].
         macro_build_fieldrangetab 'EDIDC-STATUS' so_stat[].
@@ -58,11 +59,11 @@ DATA: lt_fieldrangetab TYPE  wrffieldrangetab,
         CLEAR: lwa_tables_tab.
         lwa_tables_tab-tabname = 'EDIDS'.
         INSERT lwa_tables_tab INTO TABLE lt_tables_tab.
-
-        CALL METHOD cl_wrf_dynamic_selection=>build_where_string_tab
+* Build Dynamic WHERE clause internal table
+        CALL METHOD cl_wrf_dynamic_selection=>build_where_string_tab   
           EXPORTING
             it_selectopt = lt_fieldrangetab
-            it_from      = lt_tables_tab
+            it_from      = lt_tables_tab      "Database table where the select option to be used in SELECT statment
             i_spras      = 'E'
           IMPORTING
             et_where     = pt_where_tab.
@@ -70,7 +71,7 @@ DATA: lt_fieldrangetab TYPE  wrffieldrangetab,
       WHEN 'EDID4'.
 
 
-      WHEN 'EDP21'.
+      WHEN 'EDP21'.   
         REFRESH: lt_fieldrangetab, lt_tables_tab.
         macro_build_fieldrangetab 'edp21-mescod' so_mscod[].
         macro_build_fieldrangetab 'edp21-mesfct' so_msfct[].
