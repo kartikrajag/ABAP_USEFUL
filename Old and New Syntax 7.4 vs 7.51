@@ -1,0 +1,5 @@
+https://blogs.sap.com/2016/03/02/old-and-new-abap-syntax-overview-sheet/
+
+
+DATA and FIELD-SYMBOLS declarations                                 ||      DATA(text) = `…`.
+MOVE CORRESPONDING                                                  ||
